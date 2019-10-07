@@ -58,7 +58,7 @@ class Main:
         return width
 
     """
-    Funkcja dająca współrzędne początku i końca adnotacji, z dokładnością do 100 pikseli. 
+    Funkcja dająca współrzędne początku i końca adnotacji, z dokładnością do 1000 pikseli. 
     To ma na celu zlokalizowanie oznaczonego obrazu
     """
     def get_annotation_bounds(self, img, width, level, margin):
@@ -93,7 +93,7 @@ class Main:
         return xs, xe, ys, ye
 
     """
-    Funkcja podająca położenie oznaczonego obrazu tkanki    
+    Funkcja podająca położenie oznaczonego obrazu tkanki z dokładnością do 1 piksela
     """
     def get_patch_location(self, idx, level, annotation_bounds):
         normal_img = self.read_image(idx, False)
@@ -103,56 +103,39 @@ class Main:
 
         xs, xe, ys, ye = self.get_annotation_bounds(annotated_img, width, level, 0)  # bez marginesu
 
-        i = 256
+        ys = self.find_bound(normal_img, ys, level, width, self.UPPER)  # default 0, 0
+        ye = self.find_bound(normal_img, ye, level, width, self.LOWER)
+        xs = self.find_bound(normal_img, xs, level, width, self.LEFT, ys, ye)
+        xe = self.find_bound(normal_img, xe, level, width, self.RIGHT, ys, ye)
+
+        return xs, xe, ys, ye
+
+    def find_bound(self, img, var, level, width, location, upper_bound=0, lower_bound=0):
+        i = 256  # var = ys
         # TODO złącz w 1 metode
         # szukanie ys
         bound_set = False
         while not bound_set:
-            ys -= i
+            if location == self.UPPER or location == self.LEFT:
+                var -= i
+            else:
+                var += i
             # wczytuje co 256tą linijke
-            v = np.reshape(self.cut_image(normal_img, level=level, x_begin=0, y_begin=ys, width=width, height=1), [width, 3])
+            if location == self.UPPER or location == self.LOWER:
+                v = np.reshape(self.cut_image(img, level=level, x_begin=0, y_begin=var, width=width, height=1), [width, 3])
+            elif location == self.LEFT or location == self.RIGHT:
+                v = np.reshape(self.cut_image(img, level=level, x_begin=var, y_begin=upper_bound, width=1, height=lower_bound - upper_bound),
+                               [lower_bound - upper_bound, 3])
+            #szukam takiego wektora v, gdzie są tylko białe piksele
             if self.contains_only_white(v):
-                ys += i  # cofam sie do ostatnio napotkanego koloru
-                ys = self.log2n_search_bound(normal_img, i, level, ys, self.UPPER, 0, 0)  # nie biorą tu udziału
+                if location == self.UPPER or location == self.LEFT:
+                    var += i
+                else:
+                    var -= i  # cofam sie do ostatnio napotkanego koloru
+                bound = self.log2n_search_bound(img, i, level, var, location, upper_bound, lower_bound)  # nie biorą tu udziału
                 bound_set = True
+        return bound
 
-        # szukanie ye
-        bound_set = False
-        while not bound_set:
-            ye += i
-            # wczytuje co 256tą linijke
-            v = np.reshape(self.cut_image(normal_img, level=level, x_begin=0, y_begin=ye, width=width, height=1),
-                           [width, 3])
-            if self.contains_only_white(v):
-                ye -= i  # cofam sie do ostatnio napotkanego koloru
-                ye = self.log2n_search_bound(normal_img, i, level, ye, self.LOWER, 0, 0)
-                bound_set = True
-
-        #szukanie xs
-        bound_set = False
-        while not bound_set:
-            xs -= i
-            # wczytuje co 256tą linijke
-            v = np.reshape(self.cut_image(normal_img, level=level, x_begin=xs, y_begin=ys, width=1, height=ye-ys),
-                           [ye-ys, 3])
-            if self.contains_only_white(v):
-                xs += i  # cofam sie do ostatnio napotkanego koloru
-                xs = self.log2n_search_bound(normal_img, i, level, xs, self.LEFT, ys, ye)
-                bound_set = True
-
-        # szukanie xe
-        bound_set = False
-        while not bound_set:
-            xe += i
-            # wczytuje co 256tą linijke
-            v = np.reshape(self.cut_image(normal_img, level=level, x_begin=xe, y_begin=ys, width=1, height=ye - ys),
-                           [ye-ys, 3])
-            if self.contains_only_white(v):
-                xe -= i  # cofam sie do ostatnio napotkanego koloru
-                xe = self.log2n_search_bound(normal_img, i, level, xe, self.LEFT, ys, ye)
-                bound_set = True
-
-        return xs, xe, ys, ye  # TODO popraw potem by zwóciło 4
 
     def contains_only_white(self, v):
         all_white = True
@@ -205,6 +188,7 @@ if __name__ == "__main__":
 
     level = 2
 
+    idx = 1
 
     # TEST
     #for f in files:
@@ -218,20 +202,20 @@ if __name__ == "__main__":
 
     width = main.get_width(mr_image, level)
 
-    n_img = main.read_image(3, True)
+    n_img = main.read_image(idx, True)
 
     #TO SĄ WSP DLA ADNOTACJI
     xs, xe, ys, ye = main.get_annotation_bounds(n_img, width, level, 100)
 
     # wyszukiwanie po 256
 
-    xs, xe, ys, ye = main.get_patch_location(3, level, [xs, xe, ys, ye])
+    xs, xe, ys, ye = main.get_patch_location(idx, level, [xs, xe, ys, ye])
 
     print([xs, xe, ys, ye])
 
-    whole_image_annotated = main.read_and_cut_image(idx=3, x_begin=xs, y_begin=ys, width=xe - xs, height=ye - ys, read_annotated=True, level=level)
+    whole_image_annotated = main.read_and_cut_image(idx=idx, x_begin=xs, y_begin=ys, width=xe - xs, height=ye - ys, read_annotated=True, level=level)
 
-    whole_image = main.read_and_cut_image(idx=3, x_begin=xs, y_begin=ys, width=xe - xs, height=ye - ys, read_annotated=False, level=level)
+    whole_image = main.read_and_cut_image(idx=idx, x_begin=xs, y_begin=ys, width=xe - xs, height=ye - ys, read_annotated=False, level=level)
     plt.subplot(121)
     plt.imshow(whole_image)
     plt.subplot(122)
