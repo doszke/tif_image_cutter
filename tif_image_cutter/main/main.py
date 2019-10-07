@@ -96,7 +96,7 @@ class Main:
     Funkcja podająca położenie oznaczonego obrazu tkanki    
     """
     def get_patch_location(self, idx, level, annotation_bounds):
-        normal_img = self.read_image(idx, False)
+        normal_img = self.read_image(idx, False) 
         annotated_img = self.read_image(idx, True)
 
         width = self.get_width(normal_img, level)
