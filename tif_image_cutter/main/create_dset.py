@@ -205,30 +205,35 @@ class DsetCreator:
                 counter += 1
         return names
 
-    def read_shuffled_img_from_txt_file(self):
+    def read_shuffled_img_from_txt_file(self, shulffle=True, how_many=-1):
         filename = "_dataset_256_names.txt"
         f = open(filename, "r")
         names = f.readline().split(",")
         f.close()
-        length = len(names) - 1  # przecinek na końcu
-        order = self.shuffle2(np.zeros([length]))
-        imgs = np.zeros([5000, 256, 256, 3], dtype=np.int)
-        masks = np.zeros([5000, 256, 256, 1], dtype=np.int)
+
+        #  optional param parsing
+        if how_many != -1:
+            length = how_many
+        else:
+            length = len(names) - 1  # przecinek na końcu
+        if shulffle:
+            order = self.shuffle2(np.zeros([length]))
+        else:
+            order = np.linspace(0, length - 1, length, dtype=int)  # mało wydajne ale moge mieszać lub nie
+
+        imgs = np.zeros([length, 256, 256, 3], dtype=np.int)
+        masks = np.zeros([length, 256, 256, 1], dtype=np.int)
         for idx in range(length):
             x = plt.imread(self.dir_path + names[order[idx]])
             masks[idx, :, :, :] = np.reshape(x, [256, 256, 1])/255  # 1 albo 0
-            plt.subplot(121)
-            plt.imshow(np.reshape(x, [256, 256]))
             x = plt.imread(self.dir_path + names[order[idx]].replace("_annotated", ""))
             imgs[idx, :, :, :] = x
-            plt.subplot(122)
-            plt.imshow(x)
-            plt.show()
         return imgs, masks
 
 
 if __name__ == "__main__":
     dc = DsetCreator("G:/_dataset_256_sent/", "")#"/home/doszke/", "/home/doszke/")
     x = time.time()
-    _, _ = dc.read_shuffled_img_from_txt_file()
+    imgs, masks = dc.read_shuffled_img_from_txt_file(how_many=1000)
     print(f"czas wczytywania datasetu: {time.time() - x}")
+    print(np.shape(imgs))

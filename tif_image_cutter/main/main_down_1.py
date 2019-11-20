@@ -4,7 +4,7 @@ import numpy as np
 from tensorflow.keras.optimizers import Adam
 
 if __name__ == "__main__":
-    model_name = "model_down_1"
+    model_name = "_mypc_model_down_1"
     u = unet.Unet()
 
     dc = Dc("G:/_dataset_256_sent/", "")#"/home/doszke/", "")
@@ -13,13 +13,13 @@ if __name__ == "__main__":
 
     model.summary()
 
-    imgs, masks, order = dc.to_dataset()
+    imgs, masks = dc.read_shuffled_img_from_txt_file(how_many=1000)
 
     # todo zmień
-    model.compile(optimizer=Adam(1e-4), loss='binary_crossentropy', metrics=[u.dice_coef, u.hausdorff])
-    model.fit(imgs[order[0:10], :, :, :], masks[order[0:10], :, :, :], epochs=1, verbose=1, shuffle="batch")
+    model.compile(optimizer=Adam(1e-4), loss='binary_crossentropy', metrics=[u.dice_coef])
+    model.fit(imgs[0:500, :, :, :], masks[0:500, :, :, :], epochs=50, verbose=1, shuffle="batch")
 
-    score = model.evaluate(imgs[order[9:10], :, :, :], masks[order[9:10], :, :, :], verbose=0)
+    score = model.evaluate(imgs[900:1000, :, :, :], masks[900:1000, :, :, :], verbose=0)
 
     # zapis wag itd
     print("%s: %.2f%%" % (model.metrics_names[1], score[1] * 100))
