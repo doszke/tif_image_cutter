@@ -6,9 +6,12 @@ import tensorflow as tf
 import cv2
 from matplotlib import pyplot as plt, colors
 from scipy.signal import medfilt2d
+from staintools.reinhard_normalization import ReinhardColorNormalizer as reinhard
 
 
 class Preprocessing:
+
+    pre = reinhard()
 
     @staticmethod
     def median_filter(image):
@@ -23,31 +26,6 @@ class Preprocessing:
         return x_mean, x_std
 
     @staticmethod
-    def reinhard_transform(image):
-        s = image
-        t = Preprocessing.histogram_equalization(image)
-        s_mean, s_std = Preprocessing.get_mean_and_std(s)
-        t_mean, t_std = Preprocessing.get_mean_and_std(t)
-
-        height, width, channel = s.shape
-        _s = s.copy()
-        for i in range(0, height):
-            for j in range(0, width):
-                for k in range(0, channel):
-                    x = s[i, j, k]
-                    x = ((x - s_mean[k]) * (t_std[k] / s_std[k])) + t_mean[k]
-                    # round or +0.5
-                    x = round(x)
-                    # boundary check
-                    x = 0 if x < 0 else x
-                    x = 255 if x > 255 else x
-                    _s[i, j, k] = x
-
-        s = cv2.cvtColor(_s, cv2.COLOR_LAB2RGB)
-        return s
-
-
-    @staticmethod
     def histogram_equalization(img):
         hist, bins = np.histogram(img.flatten(), 256, [0, 256])
 
@@ -58,12 +36,14 @@ class Preprocessing:
         cdf_m = (cdf_m - cdf_m.min()) * 255 / (cdf_m.max() - cdf_m.min())
         cdf = np.ma.filled(cdf_m, 0).astype('uint8')
         return cdf[img]
-        #plt.plot(cdf_normalized, color='b')
-        #plt.hist(cdf[img].flatten(), 256, [0, 256], color='r')
-        #plt.xlim([0, 256])
-        #plt.legend(('cdf', 'histogram'), loc='upper left')
-        #plt.show()
-        #print(np.max(np.subtract(image, cdf[img])))
+
+    @staticmethod
+    def get_reinhard_instance(beginpath: str):
+        pre = reinhard()
+        target = Preprocessing.histogram_equalization(
+            plt.imread(f"{beginpath}59/59_139.tif"))  # 75/75_734.tif"))#28/28_6240.tif"))  # 75 734
+        pre.fit(target=target)
+        return pre
 
 
 if __name__ == '__main__':
@@ -71,10 +51,15 @@ if __name__ == '__main__':
     f = open("C:\\Users\\Jakub Siembida\\PycharmProjects\\inz\\tif_image_cutter\\main\\_dataset_256_names.txt")
     x = f.readline().split(",")
     print(time.time() - t)
-    mng = plt.get_current_fig_manager()
-    mng.window.state('zoomed')
 
+    norm = reinhard()
+    x[0] = "23/23_420.tif"
+
+    target = Preprocessing.histogram_equalization(plt.imread("G:/_dataset_256_sent/59/59_139.tif")) #75/75_734.tif"))#28/28_6240.tif"))  # 75 734
+    norm.fit(target=target)
     for name in x:
+        mng = plt.get_current_fig_manager()
+        mng.window.state('zoomed')
         name = name.replace("_annotated", "")
         img = plt.imread(f"G:/_dataset_256_sent/{name}")
         print(np.shape(img))
@@ -83,7 +68,9 @@ if __name__ == '__main__':
         plt.subplot(142)
         plt.imshow(Preprocessing.median_filter(img))
         plt.subplot(143)
-        plt.imshow(Preprocessing.reinhard_transform(img))
+        z = norm.transform(img)
+        print(np.shape(z))
+        plt.imshow(z)
         plt.subplot(144)
-        plt.imshow(Preprocessing.median_filter(Preprocessing.reinhard_transform(img)))
+        plt.imshow(Preprocessing.median_filter(norm.transform(img)))
         plt.show()

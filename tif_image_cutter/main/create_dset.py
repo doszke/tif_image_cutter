@@ -7,6 +7,8 @@ from matplotlib import pyplot as plt
 import random
 import time
 
+from preprocessing import Preprocessing
+
 random.seed(4678564)
 
 
@@ -205,7 +207,7 @@ class DsetCreator:
                 counter += 1
         return names
 
-    def read_shuffled_img_from_txt_file(self, shulffle=True, how_many=-1):
+    def read_shuffled_img_from_txt_file(self, shulffle=True, how_many=-1, preprocessing_method=None):
         filename = "_dataset_256_names.txt"
         f = open(filename, "r")
         names = f.readline().split(",")
@@ -227,6 +229,8 @@ class DsetCreator:
             x = plt.imread(self.dir_path + names[order[idx]])
             masks[idx, :, :, :] = np.reshape(x, [256, 256, 1])/255  # 1 albo 0
             x = plt.imread(self.dir_path + names[order[idx]].replace("_annotated", ""))
+            if preprocessing_method is not None:
+                x = preprocessing_method(x)
             imgs[idx, :, :, :] = x
         return imgs, masks
 
@@ -234,6 +238,18 @@ class DsetCreator:
 if __name__ == "__main__":
     dc = DsetCreator("G:/_dataset_256_sent/", "")#"/home/doszke/", "/home/doszke/")
     x = time.time()
-    imgs, masks = dc.read_shuffled_img_from_txt_file(how_many=1000)
+    pre = Preprocessing.get_reinhard_instance("G:/_dataset_256_sent/")
+    imgs, masks = dc.read_shuffled_img_from_txt_file(how_many=10, preprocessing=pre.transform)
     print(f"czas wczytywania datasetu: {time.time() - x}")
     print(np.shape(imgs))
+    plt.subplot(151)
+    plt.imshow(imgs[0, :, :, :])
+    plt.subplot(152)
+    plt.imshow(imgs[1, :, :, :])
+    plt.subplot(153)
+    plt.imshow(imgs[2, :, :, :])
+    plt.subplot(154)
+    plt.imshow(imgs[3, :, :, :])
+    plt.subplot(155)
+    plt.imshow(imgs[4, :, :, :])
+    plt.show()
