@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     model.summary()
 
-    imgs, masks = dc.to_dataset()
+    imgs, masks = dc.read_shuffled_img_from_txt_file(how_many=1000)
 
     model.compile(optimizer=Adam(1e-4), loss='binary_crossentropy', metrics=[u.dice_coef])
     model.fit(imgs[0:900, :, :, :], masks[0:900, :, :, :], epochs=50, verbose=1, shuffle="batch")

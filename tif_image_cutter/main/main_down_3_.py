@@ -4,7 +4,7 @@ import numpy as np
 from tensorflow.keras.optimizers import Adam
 
 if __name__ == "__main__":
-    model_name = "_mypc_model_down_3"
+    model_name = "_mypc_model_down_3_"
     u = unet.Unet()
 
     dc = Dc("/home/doszke/", "")

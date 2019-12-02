@@ -208,6 +208,7 @@ class DsetCreator:
         return names
 
     def read_shuffled_img_from_txt_file(self, shulffle=True, how_many=-1, preprocessing_method=None):
+        # filename = "_dataset_256_names.txt"
         filename = "_dataset_256_names.txt"
         f = open(filename, "r")
         names = f.readline().split(",")
@@ -219,17 +220,18 @@ class DsetCreator:
         else:
             length = len(names) - 1  # przecinek na końcu
         if shulffle:
-            order = self.shuffle2(np.zeros([length]))
+            order = self.shuffle2(np.zeros(len(names) - 1))
         else:
             order = np.linspace(0, length - 1, length, dtype=int)  # mało wydajne ale moge mieszać lub nie
-
-        imgs = np.zeros([length, 256, 256, 3], dtype=np.int)
+        imgs = np.zeros([length, 256, 256, 3], dtype=np.float)
         masks = np.zeros([length, 256, 256, 1], dtype=np.int)
         for idx in range(length):
             x = plt.imread(self.dir_path + names[order[idx]])
             masks[idx, :, :, :] = np.reshape(x, [256, 256, 1])/255  # 1 albo 0
             x = plt.imread(self.dir_path + names[order[idx]].replace("_annotated", ""))
-            if preprocessing_method is not None:
+            if type(preprocessing_method).__name__ == 'str':
+                x = Preprocessing.HE_reinhard_blur_instance(x, self.dir_path)
+            elif preprocessing_method is not None:
                 x = preprocessing_method(x)
             imgs[idx, :, :, :] = x
         return imgs, masks

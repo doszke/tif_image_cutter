@@ -1,10 +1,12 @@
 import unet
 from create_dset import DsetCreator as Dc
 import numpy as np
+from keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 
+
 if __name__ == "__main__":
-    model_name = "mypc_model_control_"
+    model_name = "main_myprep"
     u = unet.Unet()
 
     dc = Dc("/home/doszke/", "")
@@ -13,10 +15,11 @@ if __name__ == "__main__":
 
     model.summary()
 
-    imgs, masks = dc.read_shuffled_img_from_txt_file(how_many=1000)
+    imgs, masks = dc.read_shuffled_img_from_txt_file(preprocessing_method="my")
 
     model.compile(optimizer=Adam(1e-4), loss='binary_crossentropy', metrics=[u.dice_coef])
-    model.fit(imgs[0:900, :, :, :], masks[0:900, :, :, :], epochs=50, verbose=1, shuffle="batch")
+
+    model.fit(imgs[0:900, :, :, :], masks[0:900, :, :, :],  epochs=50, verbose=1, shuffle="batch")
 
     score = model.evaluate(imgs[900:1000, :, :, :], masks[900:1000, :, :, :], verbose=0)
 

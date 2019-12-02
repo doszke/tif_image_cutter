@@ -6,12 +6,15 @@ import tensorflow as tf
 import cv2
 from matplotlib import pyplot as plt, colors
 from scipy.signal import medfilt2d
+from skimage.color import rgb2hed
+from skimage.exposure import rescale_intensity
+#tif_image_cutter.preprocessing.
 from staintools.reinhard_normalization import ReinhardColorNormalizer as reinhard
 
 
 class Preprocessing:
 
-    pre = reinhard()
+    pre = None
 
     @staticmethod
     def median_filter(image):
@@ -38,12 +41,22 @@ class Preprocessing:
         return cdf[img]
 
     @staticmethod
-    def get_reinhard_instance(beginpath: str):
-        pre = reinhard()
-        target = Preprocessing.histogram_equalization(
-            plt.imread(f"{beginpath}59/59_139.tif"))  # 75/75_734.tif"))#28/28_6240.tif"))  # 75 734
-        pre.fit(target=target)
-        return pre
+    def reinhard(image):
+        return Preprocessing.pre.transform(image)
+
+    @staticmethod
+    def HE_reinhard_blur_instance(image, beginpath: str):
+        if Preprocessing.pre is None:
+            Preprocessing.pre = reinhard()
+            Preprocessing.target = Preprocessing.histogram_equalization(plt.imread(f"{beginpath}59/59_139.tif"))  # 75/75_734.tif"))#28/28_6240.tif"))  # 75 734
+            Preprocessing.pre.fit(target=Preprocessing.target)
+        reinhard_image = Preprocessing.pre.transform(image)
+        #blur_img = Preprocessing.median_filter(reinhard_image)
+        pre_img = rgb2hed(reinhard_image)
+        pre_img[:, :, 0] = rescale_intensity(pre_img[:, :, 0], out_range=(0, 1))
+        pre_img[:, :, 1] = rescale_intensity(pre_img[:, :, 1], out_range=(0, 1))
+        pre_img[:, :, 2] = rescale_intensity(pre_img[:, :, 2], out_range=(0, 1))
+        return pre_img
 
 
 if __name__ == '__main__':

@@ -4,12 +4,12 @@ import numpy as np
 from tensorflow.keras.optimizers import Adam
 
 if __name__ == "__main__":
-    model_name = "_mypc_model_down_3"
+    model_name = "_mypc_model_down_5_"
     u = unet.Unet()
 
     dc = Dc("/home/doszke/", "")
 
-    model = u.my_unet_model(size=256, down=3)
+    model = u.my_unet_model(size=256, down=5)
 
     model.summary()
 

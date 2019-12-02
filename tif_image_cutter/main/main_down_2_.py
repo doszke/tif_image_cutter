@@ -4,20 +4,19 @@ import numpy as np
 from tensorflow.keras.optimizers import Adam
 
 if __name__ == "__main__":
-    model_name = "_mypc_model_down_1"
+    model_name = "_mypc_model_down_2_"
     u = unet.Unet()
 
-    dc = Dc("G:/_dataset_256_sent/", "")#"/home/doszke/", "")
+    dc = Dc("/home/doszke/", "")
 
-    model = u.my_unet_model(size=256, down=1)
+    model = u.my_unet_model(size=256, down=2)
 
     model.summary()
 
     imgs, masks = dc.read_shuffled_img_from_txt_file(how_many=1000)
 
-    # todo zmień
     model.compile(optimizer=Adam(1e-4), loss='binary_crossentropy', metrics=[u.dice_coef])
-    model.fit(imgs[0:500, :, :, :], masks[0:500, :, :, :], epochs=50, verbose=1, shuffle="batch")
+    model.fit(imgs[0:900, :, :, :], masks[0:900, :, :, :], epochs=50, verbose=1, shuffle="batch")
 
     score = model.evaluate(imgs[900:1000, :, :, :], masks[900:1000, :, :, :], verbose=0)
 
