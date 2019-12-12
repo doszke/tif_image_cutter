@@ -1,6 +1,7 @@
 import colorsys
-import time
 import os
+import time
+
 import numpy as np
 import tensorflow as tf
 import cv2
@@ -9,7 +10,7 @@ from scipy.signal import medfilt2d
 from skimage.color import rgb2hed
 from skimage.exposure import rescale_intensity
 #tif_image_cutter.preprocessing.
-from staintools.reinhard_normalization import ReinhardColorNormalizer as reinhard
+from tif_image_cutter.preprocessing.staintools.reinhard_normalization import ReinhardColorNormalizer as reinhard
 
 
 class Preprocessing:
@@ -53,9 +54,19 @@ class Preprocessing:
         reinhard_image = Preprocessing.pre.transform(image)
         #blur_img = Preprocessing.median_filter(reinhard_image)
         pre_img = rgb2hed(reinhard_image)
-        pre_img[:, :, 0] = rescale_intensity(pre_img[:, :, 0], out_range=(0, 1))
-        pre_img[:, :, 1] = rescale_intensity(pre_img[:, :, 1], out_range=(0, 1))
-        pre_img[:, :, 2] = rescale_intensity(pre_img[:, :, 2], out_range=(0, 1))
+        # plt.subplot(143)
+        # plt.imshow(np.reshape(pre_img[:, :, 0], [256,256]), cmap="gray")
+        pre_img[:, :, 0] -= np.min(pre_img[:, :, 0])#rescale_intensity(pre_img[:, :, 0], out_range=(0, 1))
+        pre_img[:, :, 1] -= np.min(pre_img[:, :, 1])#rescale_intensity(pre_img[:, :, 1], out_range=(0, 1))
+        pre_img[:, :, 2] -= np.min(pre_img[:, :, 2])#rescale_intensity(pre_img[:, :, 2], out_range=(0, 1))
+        # plt.subplot(141)
+        # plt.imshow(image)
+        # plt.subplot(142)
+        # plt.imshow(reinhard_image)
+        # plt.subplot(144)
+        # plt.imshow(pre_img)
+        # plt.show()
+
         return pre_img
 
 
