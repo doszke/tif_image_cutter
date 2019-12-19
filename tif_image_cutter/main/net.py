@@ -16,7 +16,7 @@ from tif_image_cutter.main.unet import Unet
 class Net:
     def __init__(self):
         self.reader = mir.MultiResolutionImageReader()
-        self.img_path_prefix = "G:\\dataset_cz2\\"
+        self.img_path_prefix = "G:\\dataset_cz1\\"
         self.output_path_prefix = "G:\\dataset_cz1_output " + str(datetime.datetime.today())[0:19].replace(":", "_") + "\\"
         self.UPPER = 0
         self.LOWER = 1
@@ -180,11 +180,11 @@ class Net:
             if location == self.UPPER:  # wczytuje poziomy pasek
                 v = np.reshape(self.cut_image(img, level=level, x_begin=0, y_begin=var, width=width, height=1),
                                [width, 3])
-                should_add = ~(self.contains_only_white(v))
+                should_add = (self.contains_only_white(v))
             elif location == self.LOWER:  # wczytuje poziomy pasek
                 v = np.reshape(self.cut_image(img, level=level, x_begin=0, y_begin=var, width=width, height=1),
                                [width, 3])
-                should_add = self.contains_only_white(v)
+                should_add = not self.contains_only_white(v)
             elif location == self.LEFT:  # wczytuje pionowy pasek
                 v = np.reshape(self.cut_image(img, level=level, x_begin=var, y_begin=upper_bound, width=1, height=lower_bound - upper_bound),
                                [lower_bound - upper_bound, 3])
@@ -192,7 +192,7 @@ class Net:
             elif location == self.RIGHT:  # wczytuje pionowy pasek
                 v = np.reshape(self.cut_image(img, level=level, x_begin=var, y_begin=upper_bound, width=1, height=lower_bound - upper_bound),
                                [lower_bound - upper_bound, 3])
-                should_add = self.contains_only_white(v)
+                should_add = not self.contains_only_white(v)
             base /= 2.0
 
         return int(var)
@@ -229,30 +229,14 @@ class Net:
         
 
 if __name__ == "__main__":
-    u = Unet()
-    dataset = h.File("dataset_64.hdf5", "r")
-
-    train = dataset["train"]
-    validate = dataset["validate"]
-    model = u.my_unet_model(size=64)
-
-    print(np.shape(train["train_in"]))
-    print(np.shape(train["train_out"]))
-    print(np.shape(validate["validate_in"]))
-    print(np.shape(validate["validate_out"]))
-
-
-    model.compile(optimizer=Adam(1e-6), loss='binary_crossentropy', metrics=[u.dice_coef])
-    model.fit(train["train_in"], train["train_out"], epochs=5, verbose=1, shuffle="batch")
-
-    score = model.evaluate(validate["validate_in"], validate["validate_out"], verbose=0)
-
-    # zapis wag itd
-    print("%s: %.2f%%" % (model.metrics_names[1], score[1] * 100))
-
-    model_json = model.to_json()
-    with open("model_64.json", "w") as json_file:
-        json_file.write(model_json)
-    # serialize weights to HDF5
-    model.save_weights("model_64.h5")
-    print("Saved model to disk")
+    net = Net()
+    xs, xe, ys, ye = net.get_patch_location(idx=2, level=2)
+    img = net.read_and_cut_image(idx=2, read_annotated=False, level=2, x_begin=xs, y_begin=ys, width=xe - xs,
+                                 height=ye - ys)
+    mask = net.read_and_cut_image(idx=2, read_annotated=True, level=2, x_begin=xs, y_begin=ys, width=xe - xs,
+                                 height=ye - ys)
+    plt.subplot(211)
+    plt.imshow(img)
+    plt.subplot(212)
+    plt.imshow(np.reshape(mask, [ye-ys, xe-xs]), cmap="gray")
+    plt.show()

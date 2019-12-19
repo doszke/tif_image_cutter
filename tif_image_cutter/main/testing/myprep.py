@@ -1,6 +1,8 @@
 from scipy.signal import medfilt2d
 import numpy as np
 from matplotlib import pyplot as plt
+from skimage.color import rgb2hed
+from skimage.exposure import rescale_intensity
 
 from tif_image_cutter.preprocessing.preprocessing import Preprocessing
 
@@ -10,22 +12,24 @@ def colors(x, y):
 
 
 if __name__ == '__main__':
-    for x in range(6):
-        img = (plt.imread(f"testimg{x}.tif")/255).astype(float)
-        print(img.dtype)
-        plt.subplot(141)
+    for x in range(4):
+        img = (plt.imread(f"testimg{x}.tif"))
+        plt.subplot(420 + 2*x + 1)
         plt.imshow(img)
-        plt.subplot(142)
-        Preprocessing.HE_reinhard_blur_instance(img.astype(np.uint8), "G:/_dataset_256_sent/") #to tylko ustawia obraz
-        pre_img = Preprocessing.reinhard((img*255).astype(np.uint8))
-        plt.imshow(pre_img)
-        plt.subplot(143)
-        nimg = colors((pre_img/255).astype(float), 3)
-        plt.imshow(nimg)
-        plt.subplot(144)
-        print(np.shape(nimg))
-        output = np.zeros(np.shape(nimg))
-        for t in range(3):
-            output[:, :, t] = medfilt2d(nimg[:, :, t], [3, 3])
-        plt.imshow(output)
-        plt.show()
+        #Preprocessing.HE_reinhard_blur_instance(img.astype(np.uint8), "G:/_dataset_256_sent/") #to tylko ustawia obraz
+        #pre_img = Preprocessing.reinhard(img)
+        #pre_img = rgb2hed(img)
+        plt.subplot(420 + 2*x + 2)
+        plt.imshow(Preprocessing.median_filter(img))
+        #pre_img[:, :, 0] = rescale_intensity(pre_img[:, :, 0], (0, 1))
+
+        #plt.imshow(np.reshape(pre_img[:, :, 0], [256, 256]), cmap="gray")
+        #plt.subplot(143)
+        #pre_img[:, :, 1] = rescale_intensity(pre_img[:, :, 1], (0, 1))
+        #plt.imshow(np.reshape(pre_img[:, :, 1], [256, 256]), cmap="gray")
+        #plt.subplot(144)
+        #pre_img[:, :, 2] = rescale_intensity(pre_img[:, :, 2], (0, 1))
+        #plt.imshow(np.reshape(pre_img[:, :, 2], [256, 256]), cmap="gray")
+
+    plt.show()
+
