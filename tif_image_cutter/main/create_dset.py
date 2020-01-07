@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 import random
 import time
 
-from preprocessing import Preprocessing
+from tif_image_cutter.preprocessing.preprocessing import Preprocessing
 
 random.seed(4678564)
 
@@ -223,7 +223,7 @@ class DsetCreator:
             order = self.shuffle2(np.zeros(len(names) - 1))
         else:
             order = np.linspace(0, length - 1, length, dtype=int)  # mało wydajne ale moge mieszać lub nie
-        imgs = np.zeros([length, 256, 256, 3], dtype=np.float)
+        imgs = np.zeros([length, 256, 256, 3], dtype=np.int)
         masks = np.zeros([length, 256, 256, 1], dtype=np.int)
         for idx in range(length):
             x = plt.imread(self.dir_path + names[order[idx]])
