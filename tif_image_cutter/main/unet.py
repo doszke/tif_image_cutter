@@ -2,8 +2,7 @@
 """
 Created on Sat Jun 23 16:26:58 2018
 @author: manjotms10
-
-Fragmenty kodu zaznaczone '*' zostały dodane.
+Źródło: https://github.com/manjotms10/U-Net-in-Keras
 """
 import os
 import numpy as np
@@ -19,16 +18,15 @@ from scipy.spatial.distance import jaccard, directed_hausdorff as _hausdorff
 
 class Unet:
 
-    """*"""
     def hausdorff(self, a: tf, b: tf):
         sess = tf.Session()
         with sess:
             return _hausdorff(np.reshape(a.eval(sess), [256, 256]), np.reshape(b.eval(sess), [256, 256])) #, hausdorff(b, a))
 
-    """*"""
     def prelu(self, x: tf):
         return relu(x) - 0.001 * x
 
+    """Źródło: https://github.com/manjotms10/U-Net-in-Keras"""
     def down(self, input_layer, filters, pool=True, activation="softplus"):
         conv1 = Conv2D(filters, (3, 3), padding='same', activation=activation)(input_layer)
         residual = Conv2D(filters, (3, 3), padding='same', activation=activation)(conv1)
@@ -38,6 +36,7 @@ class Unet:
         else:
             return residual
 
+    """Źródło: https://github.com/manjotms10/U-Net-in-Keras"""
     def up(self, input_layer, residual, filters, activation="softplus"):
         filters = int(filters)
         upsample = UpSampling2D()(input_layer)
@@ -47,7 +46,6 @@ class Unet:
         conv2 = Conv2D(filters, (3, 3), padding='same', activation=activation)(conv1)
         return conv2
 
-    """*"""
     def my_unet_model(self, filters=64, size=32, down=4, activation="softplus"):
         residuals = []
         shape = [size, size, 3]
@@ -69,7 +67,7 @@ class Unet:
         model = Model(input_layer, out)
         return model
 
-
+    """Źródło: https://github.com/manjotms10/U-Net-in-Keras"""
     def get_unet_model(self, input_layer=Input(shape=[128, 128, 3]), filters=64):
         # Make a custom U-nets implementation.
         # input layer e.g: input_layer = Input(shape=[128, 128, 3])
@@ -120,6 +118,7 @@ class Unet:
         # dot, svg,
         return model
 
+    """Źródło: https://github.com/manjotms10/U-Net-in-Keras"""
     def dice_coef(self, y_true, y_pred):
         smooth = 1e-5
 
