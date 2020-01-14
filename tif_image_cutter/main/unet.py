@@ -2,6 +2,8 @@
 """
 Created on Sat Jun 23 16:26:58 2018
 @author: manjotms10
+
+Fragmenty kodu zaznaczone '*' zostały dodane.
 """
 import os
 import numpy as np
@@ -17,11 +19,13 @@ from scipy.spatial.distance import jaccard, directed_hausdorff as _hausdorff
 
 class Unet:
 
+    """*"""
     def hausdorff(self, a: tf, b: tf):
         sess = tf.Session()
         with sess:
             return _hausdorff(np.reshape(a.eval(sess), [256, 256]), np.reshape(b.eval(sess), [256, 256])) #, hausdorff(b, a))
 
+    """*"""
     def prelu(self, x: tf):
         return relu(x) - 0.001 * x
 
@@ -43,13 +47,7 @@ class Unet:
         conv2 = Conv2D(filters, (3, 3), padding='same', activation=activation)(conv1)
         return conv2
 
-    """
-    implanty stawu kolanowego: 
-        - kłykciowe
-        - zawiasowe 
-        - mieszane
-    """
-
+    """*"""
     def my_unet_model(self, filters=64, size=32, down=4, activation="softplus"):
         residuals = []
         shape = [size, size, 3]
@@ -121,7 +119,6 @@ class Unet:
         model = Model(input_layer, out)
         # dot, svg,
         return model
-
 
     def dice_coef(self, y_true, y_pred):
         smooth = 1e-5
