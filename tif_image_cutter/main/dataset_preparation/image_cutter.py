@@ -1,16 +1,9 @@
 import os
-import cv2
 import imageio
 import numpy as np
 import datetime
 import matplotlib.pyplot as plt
-import matplotlib.colors as color
 import multiresolutionimageinterface as mir
-
-from tensorflow.keras.optimizers import Adam
-import h5py as h
-
-from tif_image_cutter.main.unet import Unet
 
 
 class Net:

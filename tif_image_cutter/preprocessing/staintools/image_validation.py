@@ -1,5 +1,11 @@
 import numpy as np
 
+"""
+Autor: Peter554
+Źródło: https://github.com/Peter554/StainTools
+Licencja: MIT
+"""
+
 
 def is_image(I):
     """

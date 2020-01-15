@@ -1,12 +1,10 @@
 from create_dset import DsetCreator
 import numpy as np
-import h5py as h
 import tensorflow as tf
 from tensorflow.keras import *
 from tensorflow.keras.models import model_from_json
-from matplotlib import pyplot as plt
 
-from tif_image_cutter.main import unet
+from tif_image_cutter.main.model import unet
 from tif_image_cutter.preprocessing.preprocessing import Preprocessing
 
 if __name__ == "__main__":

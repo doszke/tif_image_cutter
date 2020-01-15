@@ -1,15 +1,11 @@
-import colorsys
-import os
+
 import time
 
 import numpy as np
-import tensorflow as tf
 import cv2
 from matplotlib import pyplot as plt, colors
-from scipy.signal import medfilt2d
 from skimage.color import rgb2hed
 from skimage.exposure import rescale_intensity
-#tif_image_cutter.preprocessing.
 from tif_image_cutter.preprocessing.staintools.reinhard_normalization import ReinhardColorNormalizer as reinhard
 
 

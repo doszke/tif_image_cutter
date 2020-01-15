@@ -3,6 +3,7 @@
 Created on Sat Jun 23 16:26:58 2018
 @author: manjotms10
 Źródło: https://github.com/manjotms10/U-Net-in-Keras
+Licencja: MIT
 """
 import os
 import numpy as np
@@ -26,7 +27,8 @@ class Unet:
     def prelu(self, x: tf):
         return relu(x) - 0.001 * x
 
-    """Źródło: https://github.com/manjotms10/U-Net-in-Keras"""
+    """Źródło: https://github.com/manjotms10/U-Net-in-Keras
+    Licencja: MIT"""
     def down(self, input_layer, filters, pool=True, activation="softplus"):
         conv1 = Conv2D(filters, (3, 3), padding='same', activation=activation)(input_layer)
         residual = Conv2D(filters, (3, 3), padding='same', activation=activation)(conv1)
@@ -36,7 +38,8 @@ class Unet:
         else:
             return residual
 
-    """Źródło: https://github.com/manjotms10/U-Net-in-Keras"""
+    """Źródło: https://github.com/manjotms10/U-Net-in-Keras
+    Licencja: MIT"""
     def up(self, input_layer, residual, filters, activation="softplus"):
         filters = int(filters)
         upsample = UpSampling2D()(input_layer)
@@ -67,7 +70,8 @@ class Unet:
         model = Model(input_layer, out)
         return model
 
-    """Źródło: https://github.com/manjotms10/U-Net-in-Keras"""
+    """Źródło: https://github.com/manjotms10/U-Net-in-Keras
+    Licencja: MIT"""
     def get_unet_model(self, input_layer=Input(shape=[128, 128, 3]), filters=64):
         # Make a custom U-nets implementation.
         # input layer e.g: input_layer = Input(shape=[128, 128, 3])

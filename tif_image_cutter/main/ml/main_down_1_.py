@@ -6,21 +6,19 @@ from tensorflow.keras.optimizers import Adam
 if __name__ == "__main__":
     model_name = "_mypc_model_down_1_"
     u = unet.Unet()
-    path1 = "G:/_dataset_256_sent/"
-    path2 = "/home/doszke/"
-    dc = Dc(path2, "")
+
+    dc = Dc("/home/doszke/", "")
 
     model = u.my_unet_model(size=256, down=1)
 
     model.summary()
 
-    imgs, masks = dc.read_shuffled_img_from_txt_file(how_many=100, shulffle=True)
-    print(np.max(masks))
+    imgs, masks = dc.read_shuffled_img_from_txt_file(how_many=1000)
 
     model.compile(optimizer=Adam(1e-4), loss='binary_crossentropy', metrics=[u.dice_coef])
-    model.fit(imgs[0:90, :, :, :], masks[0:90, :, :, :], epochs=5, verbose=1, shuffle="batch")
+    model.fit(imgs[0:900, :, :, :], masks[0:900, :, :, :], epochs=50, verbose=1, shuffle="batch")
 
-    score = model.evaluate(imgs[90:100, :, :, :], masks[90:100, :, :, :], verbose=0)
+    score = model.evaluate(imgs[900:1000, :, :, :], masks[900:1000, :, :, :], verbose=0)
 
     # zapis wag itd
     print("%s: %.2f%%" % (model.metrics_names[1], score[1] * 100))

@@ -1,8 +1,7 @@
-import multiresolutionimageinterface as mir
 from matplotlib import pyplot as plt
 import numpy as np
 
-from tif_image_cutter.main.net import Net
+from tif_image_cutter.main.dataset_preparation.image_cutter import Net
 
 if __name__ == "__main__":
     net = Net()

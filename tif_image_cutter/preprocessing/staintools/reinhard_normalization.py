@@ -3,6 +3,12 @@ import cv2 as cv
 # tif_image_cutter.preprocessing.
 from tif_image_cutter.preprocessing.staintools.image_validation import is_uint8_image
 
+"""
+Autor: Peter554
+Źródło: https://github.com/Peter554/StainTools
+Licencja: MIT
+"""
+
 
 class ReinhardColorNormalizer(object):
     """
